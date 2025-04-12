@@ -8,6 +8,7 @@ use hylaean::entity::Entity;
 struct Position {
     x: f32,
     y: f32,
+    z: f32,
 }
 
 impl Component for Position {}
@@ -16,6 +17,7 @@ impl Component for Position {}
 struct Velocity {
     vx: f32,
     vy: f32,
+    vz: f32,
 }
 
 impl Component for Velocity {}
@@ -31,6 +33,7 @@ impl System for MoveSystem {
                 if let Some(pos) = world.get_component_mut::<Position>(&entity) {
                     pos.x += vel.vx;
                     pos.y += vel.vy;
+                    pos.z += vel.vz;
                 }
             }
         }
@@ -43,14 +46,14 @@ fn main() {
     world.register_component::<Velocity>();
 
     let e = world.create_entity();
-    world.add_component(e, Position { x: 0.0, y: 0.0 });
-    world.add_component(e, Velocity { vx: 1.0, vy: 1.5 });
+    world.add_component(e, Position { x: 0.0, y: 0.0, z: 0.0  });
+    world.add_component(e, Velocity { vx: 1.0, vy: 1.5, vz: 2.0 });
 
     let mut move_system = MoveSystem;
     move_system.run(&mut world);
 
     let pos = world.get_component::<Position>(&e).unwrap();
-    println!("Entity {:?} moved to position: ({}, {})", e, pos.x, pos.y);
+    println!("Entity {:?} moved to position: ({}, {}, {})", e, pos.x, pos.y, pos.z);
 }
 
 #[cfg(test)]
@@ -64,8 +67,8 @@ mod tests {
         world.register_component::<Velocity>();
 
         let e = world.create_entity();
-        world.add_component(e, Position { x: 2.0, y: 3.0 });
-        world.add_component(e, Velocity { vx: 0.5, vy: -1.0 });
+        world.add_component(e, Position { x: 2.0, y: 3.0, z: 4.0 });
+        world.add_component(e, Velocity { vx: 0.5, vy: -1.0, vz: 2.0  });
 
         let mut move_system = MoveSystem;
         move_system.run(&mut world);
@@ -73,5 +76,6 @@ mod tests {
         let pos = world.get_component::<Position>(&e).unwrap();
         assert_eq!(pos.x, 2.5);
         assert_eq!(pos.y, 2.0);
+        assert_eq!( pos.z, 6.0);
     }
 }
